@@ -4,6 +4,14 @@ Prototype for the Software Project Management semester project, Zhengzhou Univer
 
 Developer: MD Tariq Uz Zaman
 
+## Team
+
+| Member | Role | Responsibilities |
+| --- | --- | --- |
+| MD Eaftekhirul Islam ([@eafte](https://github.com/eafte)) | Project Manager | Schedule, WBS, weekly meetings, progress and risks |
+| MD Tariq Uz Zaman ([@TARIQ8099](https://github.com/TARIQ8099)) | Business Analyst and Developer | Requirements and the code of this app |
+| MD Abir Ahmmed | Design and Documentation Lead | UML diagrams, mock-ups, report and slides |
+
 ## What it does
 
 - Students log in, submit requests to the School of International Education (SIE) and follow their status.
