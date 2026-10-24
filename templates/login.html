@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="auth">
+  <section class="auth-panel">
+    <span class="logo logo-lg">{{ icon('globe-hemisphere-east') }}</span>
+    <h1>Requests and permit deadlines in one place</h1>
+    <p>For international students and the SIE office at Zhengzhou University.</p>
+    <ul class="features">
+      <li>{{ icon('paper-plane-tilt') }}<span>Submit requests online, without visiting the office</span></li>
+      <li>{{ icon('list-checks') }}<span>Follow each request from Submitted to Ready for pickup</span></li>
+      <li>{{ icon('bell-ringing') }}<span>Get a warning {{ reminder_days }} days before your residence permit expires</span></li>
+    </ul>
+  </section>
+  <form method="post" class="auth-form">
+    <h2>Log in</h2>
+    <p class="muted">Use your student or staff account.</p>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="username">Username</label>
+    <input id="username" name="username" autocomplete="username" required autofocus>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <button class="btn btn-block" type="submit">Log in</button>
+  </form>
+</div>
+{% endblock %}

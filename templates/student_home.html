@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}My requests{% endblock %}
+{% block content %}
+{% set tone = 'none' if days is none else ('danger' if days < apply_before_days else ('warning' if days <= reminder_days else 'ok')) %}
+
+<div class="page-head">
+  <div>
+    <h1>Welcome, {{ me.full_name.split()[0] }}</h1>
+    <p class="muted">Track your requests to the SIE office and your residence permit deadline.</p>
+  </div>
+  <a class="btn" href="{{ url_for('new_request') }}">{{ icon('plus') }}<span>New request</span></a>
+</div>
+
+{% if alert %}
+  <p class="alert alert-{{ tone }}" role="alert">{{ icon('warning-circle') }}<span>{{ alert }}</span></p>
+{% endif %}
+
+<section class="card permit">
+  <div class="countdown">
+    <span class="count count-{{ tone }}">
+      {% if days is none %}{{ icon('identification-card') }}{% elif days < 0 %}0{% else %}{{ days }}{% endif %}
+    </span>
+    <div>
+      <h2>Residence permit</h2>
+      {% if days is none %}
+        <p class="muted">Save your expiry date to get a reminder {{ reminder_days }} days before it.</p>
+      {% else %}
+        <p><strong>{{ 'Expired' if days < 0 else (days ~ ' day' ~ ('' if days == 1 else 's') ~ ' left') }}</strong></p>
+        <p class="muted">
+          {% if days < 0 %}Expired on {{ me.permit_expiry }}.
+          {% elif days < apply_before_days %}Expires {{ me.permit_expiry }}. The extension deadline was {{ deadline }}.
+          {% else %}Expires {{ me.permit_expiry }}. Apply for an extension by {{ deadline }}.{% endif %}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+  <form method="post" action="{{ url_for('update_permit') }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label for="permit_expiry">Expiry date</label>
+      <input id="permit_expiry" type="date" name="permit_expiry" value="{{ me.permit_expiry or '' }}" required>
+    </div>
+    <button class="btn btn-secondary" type="submit">{{ icon('calendar-blank') }}<span>Save date</span></button>
+  </form>
+</section>
+
+<section class="card">
+  <div class="card-head">
+    <h2>My requests</h2>
+    <span class="muted">{{ requests|length }} total</span>
+  </div>
+  {% if requests %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Type</th><th>My note</th><th>Status</th><th>Comment from SIE</th></tr>
+        </thead>
+        <tbody>
+          {% for r in requests %}
+            <tr>
+              <td class="nowrap">{{ r.created_at[:10] }}</td>
+              <td><strong>{{ r.type }}</strong></td>
+              <td>{{ r.note or '-' }}</td>
+              <td>{{ status_pill(r.status) }}</td>
+              <td>{{ r.staff_comment or '-' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty">
+      {{ icon('tray') }}
+      <p>You have no requests yet.</p>
+      <a class="btn btn-secondary" href="{{ url_for('new_request') }}">{{ icon('plus') }}<span>Create your first request</span></a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

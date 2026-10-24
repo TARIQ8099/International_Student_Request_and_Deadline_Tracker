@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Request #{{ r.id }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('staff_dashboard') }}">{{ icon('arrow-left') }}<span>Back to dashboard</span></a>
+<div class="page-head">
+  <div>
+    <h1>Request #{{ r.id }}</h1>
+    <p class="muted">{{ r.type }} from {{ r.full_name }}</p>
+  </div>
+  {{ status_pill(r.status) }}
+</div>
+
+<div class="split">
+  <section class="card">
+    <h2>Details</h2>
+    <dl class="details">
+      <dt>Student</dt>
+      <dd>{{ r.full_name }}{% if r.graduated_on %}<span class="tag">{{ icon('graduation-cap') }}Graduated {{ r.graduated_on }}</span>{% endif %}</dd>
+      <dt>Type</dt><dd>{{ r.type }}</dd>
+      <dt>Submitted</dt><dd>{{ r.created_at }}</dd>
+      <dt>Last update</dt><dd>{{ r.updated_at }}</dd>
+      <dt>Permit expiry</dt><dd>{{ r.permit_expiry or 'Not recorded' }}</dd>
+      <dt>Student note</dt><dd>{{ r.note or '-' }}</dd>
+    </dl>
+  </section>
+
+  <form method="post" class="card">
+    <h2>Update request</h2>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      {% for s in statuses %}<option {{ 'selected' if s == r.status }}>{{ s }}</option>{% endfor %}
+    </select>
+    <label for="staff_comment">Comment for the student</label>
+    <textarea id="staff_comment" name="staff_comment" rows="4" maxlength="500"
+              aria-describedby="comment-help">{{ r.staff_comment }}</textarea>
+    <p id="comment-help" class="help">The student sees this comment next to the request.</p>
+    <div class="actions">
+      <button class="btn" type="submit">{{ icon('check-circle') }}<span>Save changes</span></button>
+      <a class="btn btn-secondary" href="{{ url_for('staff_dashboard') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

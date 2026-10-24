@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}New request{% endblock %}
+{% block content %}
+<div class="narrow">
+  <a class="back" href="{{ url_for('student_home') }}">{{ icon('arrow-left') }}<span>Back to my requests</span></a>
+  <form method="post" class="card">
+    <span class="card-icon">{{ icon('file-text') }}</span>
+    <h1>New request</h1>
+    <p class="muted">The SIE office reviews your request and updates its status here.</p>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="type">Request type</label>
+    <select id="type" name="type" required>
+      <option value="">Choose a type</option>
+      {% for t in types %}<option>{{ t }}</option>{% endfor %}
+    </select>
+    <label for="note">Note for the SIE office <span class="optional">(optional)</span></label>
+    <textarea id="note" name="note" rows="4" maxlength="500" aria-describedby="note-help"></textarea>
+    <p id="note-help" class="help">Up to 500 characters.</p>
+    <div class="actions">
+      <button class="btn" type="submit">{{ icon('paper-plane-tilt') }}<span>Submit request</span></button>
+      <a class="btn btn-secondary" href="{{ url_for('student_home') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

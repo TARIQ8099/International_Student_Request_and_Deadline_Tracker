@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Students</h1>
+    <p class="muted">Add new students each semester, and mark students as graduated when they finish.</p>
+  </div>
+  <span class="muted">{{ current|length }} current, {{ graduated|length }} graduated</span>
+</div>
+
+<form method="post" class="card" autocomplete="off">
+  <div class="card-head">
+    <h2>{{ icon('user-plus') }}Add a student</h2>
+  </div>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <div class="form-grid">
+    <div class="field">
+      <label for="full_name">Full name</label>
+      <input id="full_name" name="full_name" maxlength="100" value="{{ form.full_name }}" required>
+    </div>
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" name="username" maxlength="30" pattern="[a-z0-9._\-]{3,30}" value="{{ form.username }}"
+             aria-describedby="username-help" required>
+      <p id="username-help" class="help">3 to 30 lowercase letters, numbers, dots, dashes or underscores.</p>
+    </div>
+    <div class="field">
+      <label for="password">Starting password</label>
+      <input id="password" name="password" type="password" minlength="{{ min_password }}" maxlength="{{ max_password }}"
+             autocomplete="new-password" aria-describedby="password-help" required>
+      <p id="password-help" class="help">At least {{ min_password }} characters. The student can change it after logging in.</p>
+    </div>
+    <div class="field">
+      <label for="permit_expiry">Permit expiry date <span class="optional">(optional)</span></label>
+      <input id="permit_expiry" name="permit_expiry" type="date" value="{{ form.permit_expiry }}">
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn" type="submit">{{ icon('user-plus') }}<span>Add student</span></button>
+  </div>
+</form>
+
+<section class="card">
+  <div class="card-head">
+    <h2>{{ icon('users') }}Current students</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Student</th><th>Username</th><th>Permit expiry</th><th>Requests</th><th><span class="sr-only">Action</span></th></tr>
+      </thead>
+      <tbody>
+        {% for s in current %}
+          {% set days = days_left(s.permit_expiry) %}
+          <tr>
+            <td class="nowrap">
+              <span class="person">
+                <span class="avatar avatar-sm" aria-hidden="true">{{ s.full_name.split()|map('first')|join }}</span>
+                <strong>{{ s.full_name }}</strong>
+              </span>
+            </td>
+            <td>{{ s.username }}</td>
+            <td class="nowrap">
+              {% if days is none %}
+                <span class="muted">Not recorded</span>
+              {% else %}
+                {{ s.permit_expiry }}
+                {% if days <= reminder_days %}
+                  <span class="badge {{ 'badge-danger' if days < apply_before_days else 'badge-warning' }}">
+                    {{ 'Expired' if days < 0 else (days ~ ' days left') }}
+                  </span>
+                {% endif %}
+              {% endif %}
+            </td>
+            <td>{{ s.request_count }}</td>
+            <td class="right">
+              <form method="post" action="{{ url_for('graduate_student', student_id=s.id) }}"
+                    onsubmit="return confirm('Mark this student as graduated? They will no longer be able to log in.');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="btn btn-secondary" type="submit" title="Mark as graduated">{{ icon('graduation-cap') }}<span>Mark as graduated</span></button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="empty-row">No current students. Add the first one above.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <div class="card-head">
+    <h2>{{ icon('graduation-cap') }}Graduated students</h2>
+  </div>
+  {% if graduated %}
+    <p class="help">They can no longer log in. Their old requests stay in the records under Dashboard &gt; Students: Graduated.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Student</th><th>Username</th><th>Graduated on</th><th>Requests</th><th><span class="sr-only">Action</span></th></tr>
+        </thead>
+        <tbody>
+          {% for s in graduated %}
+            <tr>
+              <td class="nowrap">
+                <span class="person">
+                  <span class="avatar avatar-sm avatar-muted" aria-hidden="true">{{ s.full_name.split()|map('first')|join }}</span>
+                  <strong>{{ s.full_name }}</strong>
+                </span>
+              </td>
+              <td>{{ s.username }}</td>
+              <td class="nowrap">{{ s.graduated_on }}</td>
+              <td>{{ s.request_count }}</td>
+              <td class="right">
+                <form method="post" action="{{ url_for('restore_student', student_id=s.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button class="btn btn-secondary" type="submit" title="Restore">{{ icon('arrow-counter-clockwise') }}<span>Restore</span></button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="muted">No graduated students yet. Use "Mark as graduated" when a student finishes their studies.</p>
+  {% endif %}
+</section>
+{% endblock %}

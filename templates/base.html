@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} | SIE Request &amp; Deadline Tracker</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% include "_icons.html" %}
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('home') }}">
+      <span class="logo">{{ icon('globe-hemisphere-east') }}</span>
+      <span class="brand-text">
+        <strong>SIE Request &amp; Deadline Tracker</strong>
+        <small>School of International Education</small>
+      </span>
+    </a>
+    {% if session.user_id %}
+      <nav class="mainnav" aria-label="Main">
+        {% if session.role == 'staff' %}
+          <a href="{{ url_for('staff_dashboard') }}" {% if request.endpoint in ('staff_dashboard', 'manage_request') %}aria-current="page"{% endif %}>{{ icon('squares-four') }}<span>Dashboard</span></a>
+          <a href="{{ url_for('students') }}" {% if request.endpoint == 'students' %}aria-current="page"{% endif %}>{{ icon('users') }}<span>Students</span></a>
+        {% else %}
+          <a href="{{ url_for('student_home') }}" {% if request.endpoint in ('student_home', 'new_request') %}aria-current="page"{% endif %}>{{ icon('tray') }}<span>My requests</span></a>
+        {% endif %}
+      </nav>
+      <div class="account">
+        <span class="avatar" aria-hidden="true">{{ session.name.split()|map('first')|join }}</span>
+        <span class="who">
+          <strong>{{ session.name }}</strong>
+          <small>{{ 'SIE office staff' if session.role == 'staff' else 'Student' }}</small>
+        </span>
+        <a class="btn btn-ghost" href="{{ url_for('change_password') }}" title="Change password">{{ icon('key') }}<span>Password</span></a>
+        <a class="btn btn-ghost" href="{{ url_for('logout') }}" title="Log out">{{ icon('sign-out') }}<span>Log out</span></a>
+      </div>
+    {% endif %}
+  </header>
+  <main id="content">
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <p class="flash flash-{{ category }}" role="status">
+        {{ icon('check-circle' if category == 'success' else 'warning-circle') }}<span>{{ message }}</span>
+      </p>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>Software Project Management prototype, Zhengzhou University. Sample data only.</footer>
+</body>
+</html>
